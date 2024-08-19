@@ -1,4 +1,4 @@
-import knex, { Knex } from "knex";
+import { Knex } from "knex";
 
 const config: { [key: string]: Knex.Config } = {
   development: {
@@ -11,15 +11,15 @@ const config: { [key: string]: Knex.Config } = {
     connection: process.env.DEV_CONNECTION, // TODO: Change to PROD connection string/object
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
-      tableName: "knex_migrations"
-    }
-  }
-}
+      tableName: "knex_migrations",
+    },
+  },
+};
 
 const environment = process.env.NODE_ENV || "development";
-const knexConfig = config[environment]
+const knexConfig = config[environment];
 
 export default knexConfig;

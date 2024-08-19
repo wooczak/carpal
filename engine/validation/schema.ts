@@ -25,9 +25,20 @@ const passwordSchema = z
   .regex(regexPatterns.specialChar, validationMessages.specialChar("Password"))
   .regex(regexPatterns.uppercase, validationMessages.uppercase("Password"));
 
+const keepMeSignedInSchema = z.boolean({
+  message: "The keepMeSignedIn boolean has not been sent",
+});
+
 export const userSignUpInputSchema = z.object({
   name: nameSchema,
   surname: surnameSchema,
   email: emailSchema,
   password: passwordSchema,
+  keepMeSignedIn: keepMeSignedInSchema,
+});
+
+export const userSignInInputSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  keepMeSignedIn: keepMeSignedInSchema,
 });

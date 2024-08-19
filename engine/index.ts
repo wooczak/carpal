@@ -1,14 +1,20 @@
+import { type User } from "./types/database";
 import "dotenv/config";
 import express from "express";
 import dbConfig from "./knex/db";
 import { GET, POST } from "./constants/routes";
 import knex from "knex";
 import bodyParser from "body-parser";
-import { ZodError } from "zod";
-import { userSignUpInputSchema } from "./validation/schema";
+import { type ZodError } from "zod";
+import {
+  userSignInInputSchema,
+  userSignUpInputSchema,
+} from "./validation/schema";
 import argon2 from "argon2";
 import { v4 as uuidv4 } from "uuid";
 import { validationMessages } from "./validation/constants";
+import session from "express-session";
+import { store } from "./knex/knexstore";
 
 const app = express();
 const db = knex(dbConfig);
@@ -17,6 +23,23 @@ const PORT = process.env.PORT;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(
+  session({
+    secret: "keyboard cat",
+    cookie: {
+      maxAge: 10000,
+      secure: process.env.NODE_ENV === "production",
+    },
+    store,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// Return the session to test
+app.get("/", function (req, res) {
+  res.json(req.session);
+});
 
 app.get(GET.ALL_USERS, async function (_req, res) {
   try {
@@ -27,14 +50,71 @@ app.get(GET.ALL_USERS, async function (_req, res) {
   }
 });
 
+app.post(POST.SIGN_IN, async function (req, res) {
+  try {
+    const body = req.body;
+
+    const userSignInInput = userSignInInputSchema.parse(body);
+
+    const existingUser = await db<User>("users")
+      .where({ email: userSignInInput.email })
+      .first();
+
+    if (!existingUser) {
+      return res.status(400).json({
+        error: validationMessages.noExistingUser(userSignInInput.email),
+      });
+    }
+
+    const passwordVerifed = await argon2.verify(
+      existingUser.password,
+      userSignInInput.password
+    );
+
+    if (!passwordVerifed) {
+      return res.status(401).json({
+        error: validationMessages.incorrectPassword,
+      });
+    } else {
+      req.session.user = {
+        user_id: existingUser.id,
+      };
+      res.status(200).json({
+        message: "User logged in successfully",
+        userData: existingUser,
+      });
+    }
+  } catch (error: any) {
+    res.status(500).json({
+      error: (error as ZodError).issues
+        ? (error as ZodError).issues.map((err) => err.message)
+        : (error as Error).message,
+    });
+  }
+});
+
+app.post(POST.SIGN_OUT, async function (req, res) {
+  try {
+    req.session.destroy();
+    res.status(200).json({
+      message: "User session destroyed. User logged out successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: (error as ZodError).issues
+        ? (error as ZodError).issues.map((err) => err.message)
+        : (error as Error).message,
+    });
+  }
+});
+
 app.post(POST.SIGN_UP, async function (req, res) {
   try {
     const body = req.body;
 
-    // Validate the password - if incorrect, error is caught and the logic below breaks
     const userSignUpInput = userSignUpInputSchema.parse(body);
 
-    const existingUser = await db<typeof userSignUpInput>("users")
+    const existingUser = await db<User>("users")
       .where({ email: userSignUpInput.email })
       .first();
 
@@ -47,8 +127,7 @@ app.post(POST.SIGN_UP, async function (req, res) {
     const password = userSignUpInput.password;
     const hashedPassword = await argon2.hash(password);
 
-    const newUser = await db
-      .table("users")
+    const newUser = await db<User>("users")
       .insert([
         {
           id: uuidv4(),
@@ -56,9 +135,14 @@ app.post(POST.SIGN_UP, async function (req, res) {
           surname: userSignUpInput.surname,
           password: hashedPassword,
           email: userSignUpInput.email,
+          keep_me_signed_in: userSignUpInput.keepMeSignedIn || false,
         },
       ])
       .returning("*");
+
+    req.session.user = {
+      user_id: newUser[0].id,
+    };
 
     res.status(200).json({
       message: "New user added",
@@ -71,6 +155,10 @@ app.post(POST.SIGN_UP, async function (req, res) {
         : (error as Error).message,
     });
   }
+});
+
+app.get("/", function (req, res) {
+  res.json(req.session);
 });
 
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`));
