@@ -1,4 +1,5 @@
 export const GET = {
+    HOMEPAGE: '/',
     ALL_USERS: '/users'
 } as const;
 

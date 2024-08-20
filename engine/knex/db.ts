@@ -3,7 +3,7 @@ import { Knex } from "knex";
 const config: { [key: string]: Knex.Config } = {
   development: {
     client: "pg",
-    connection: "postgresql://wooczak:kacper9@localhost:5432/goodjoedb",
+    connection: "postgresql://wooczak:kacper9@localhost:5432/carpaldb",
   },
 
   production: {

@@ -1,0 +1,32 @@
+{
+  "name": "carpal",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "engine:dev": "npm run dev -w @carpal/engine", 
+    "dashboard:dev": "npm run ios -w @carpal/dashboard",
+    "dashboard:web": "npm run web -w @carpal/dashboard",
+    "app:ios": "concurrently \"npm run engine:dev\" \"npm run dashboard:dev\"",
+    "app:web": "concurrently \"npm run engine:dev\" \"npm run dashboard:web\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.4.1",
+    "concurrently": "^8.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "workspaces": [
+    "./dashboard",
+    "./engine",
+    "packages/*"
+  ]
+}

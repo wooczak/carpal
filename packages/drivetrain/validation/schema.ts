@@ -1,5 +1,5 @@
-import { regexPatterns, validationMessages } from "./constants";
 import { z } from "zod";
+import { regexPatterns, validationMessages } from "./constants";
 
 const nameSchema = z
   .string()

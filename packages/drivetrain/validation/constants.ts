@@ -13,7 +13,7 @@ export const validationMessages = {
   emailAlreadyInUse: (email: string) => `The email ${email} is already in use.`,
   noExistingUser: (email: string) =>
     `We couldn't find any user with the e-mail: ${email}. Please sign up first.`,
-  incorrectPassword: 'The provided password is incorrect.'
+  incorrectPassword: "The provided password is incorrect.",
 };
 
 export const regexPatterns = {
