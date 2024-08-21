@@ -9,10 +9,12 @@ import {
   TextInput,
   View,
 } from "react-native";
+import useUserStore from "../store/user";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { updateUserData } = useUserStore();
 
   async function handleSignIn() {
     try {
@@ -30,6 +32,12 @@ export default function SignIn() {
       });
 
       if (res.status === 200) {
+        const { userData } = await res.json();
+        updateUserData({
+          name: userData.name,
+          surname: userData.surname,
+          email: userData.email,
+        });
         router.navigate("/");
       }
     } catch (error) {
@@ -72,10 +80,10 @@ export default function SignIn() {
   );
 }
 
-const lightYellow = "#FEFBD8";
-const mainPeach = "#EECEB9";
-const lightPurple = "#BB9AB1";
-const mainPurple = "#987D9A";
+export const lightYellow = "#FEFBD8";
+export const mainPeach = "#EECEB9";
+export const lightPurple = "#BB9AB1";
+export const mainPurple = "#987D9A";
 
 const styles = StyleSheet.create({
   container: {
@@ -124,7 +132,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#FFF",
     fontWeight: "600",
-    letterSpacing: 1
+    letterSpacing: 1,
   },
   signUpCTAWrapper: {
     width: "100%",
@@ -132,16 +140,16 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: 8
+    gap: 8,
   },
   signUpCTA: {
     borderWidth: 1,
     width: "100%",
     padding: 12,
-    borderRadius: 8
+    borderRadius: 8,
   },
   signUpCTAText: {
     textAlign: "center",
     fontWeight: "600",
-  }
+  },
 });

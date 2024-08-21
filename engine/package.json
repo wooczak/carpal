@@ -5,8 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "dev": "npx nodemon index.ts",
-    "db:migrate:latest": "npx knex migrate:latest --knexfile knex/db.ts --migrations-directory ./migrations",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "db:migrate:latest": "npx knex migrate:latest --knexfile knex/db.ts --migrations-directory ./migrations"
   },
   "author": "Kacper Łuczak",
   "license": "ISC",

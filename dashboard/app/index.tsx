@@ -2,9 +2,16 @@ import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
+import * as Location from "expo-location";
+import MapView, { Region } from "react-native-maps";
+import { lightPurple } from "./sign-in";
+import useUserStore from "../store/user";
 
 export default function App() {
-  const [authState, setAuthState] = useState("pending...");
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
+  const { name, resetUserData } = useUserStore();
 
   async function handleSignOut() {
     try {
@@ -13,6 +20,7 @@ export default function App() {
       });
 
       if (signOutRes.status === 200) {
+        resetUserData();
         router.navigate("sign-in");
       }
     } catch (error) {
@@ -20,29 +28,40 @@ export default function App() {
     }
   }
 
-  async function getAuth() {
-    try {
-      const rootRes = await fetch("http://localhost:8080/", {
-        credentials: "include",
-      });
-
-      if (rootRes.status === 401) {
-        router.replace("/sign-in");
-      } else {
-        setAuthState("user logged in");
-      }
-    } catch (error) {
-      throw new Error(error as string)
-    }
-  }
   useEffect(() => {
-    getAuth();
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== Location.PermissionStatus.GRANTED) {
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync();
+      setLocation(location);
+    })();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <Text>{authState}</Text>
+      <Text style={styles.welcomeTitle}>Welcome, {name}</Text>
+      <MapView
+        style={{
+          width: "100%",
+          height: 150,
+          borderRadius: 16,
+        }}
+        showsUserLocation
+        showsBuildings={false}
+        zoomEnabled={false}
+        pitchEnabled={false}
+        showsPointsOfInterest={false}
+        showsScale={false}
+        provider={undefined}
+        cameraZoomRange={{
+          maxCenterCoordinateDistance: 2000,
+        }}
+        region={location?.coords as unknown as Region}
+      />
       <Button title="Sign out" onPress={handleSignOut} />
       <StatusBar style="auto" />
     </View>
@@ -50,10 +69,18 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  welcomeTitle: {
+    fontSize: 36,
+    fontWeight: "800",
+    color: lightPurple
+  },
   container: {
     flex: 1,
+    flexDirection: "column",
+    gap: 16,
+    paddingHorizontal: 8,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
   },
 });
