@@ -1,9 +1,9 @@
 import {
+  types,
   userSignInInputSchema,
   userSignUpInputSchema,
   validationMessages,
 } from "@carpal/drivetrain";
-import { type User } from "./types/database";
 import "dotenv/config";
 import express, { type NextFunction } from "express";
 import dbConfig from "./knex/db";
@@ -66,7 +66,7 @@ app.post(POST.SIGN_IN, async function (req, res) {
 
     const userSignInInput = userSignInInputSchema.parse(body);
 
-    const existingUser = await db<User>("users")
+    const existingUser = await db<types.User>("users")
       .where({ email: userSignInInput.email })
       .first();
 
@@ -128,7 +128,7 @@ app.post(POST.SIGN_UP, async function (req, res) {
 
     const userSignUpInput = userSignUpInputSchema.parse(body);
 
-    const existingUser = await db<User>("users")
+    const existingUser = await db<types.User>("users")
       .where({ email: userSignUpInput.email })
       .first();
 
@@ -141,7 +141,7 @@ app.post(POST.SIGN_UP, async function (req, res) {
     const password = userSignUpInput.password;
     const hashedPassword = await argon2.hash(password);
 
-    const newUser = await db<User>("users")
+    const newUser = await db<types.User>("users")
       .insert([
         {
           id: uuidv4(),

@@ -1,32 +1,21 @@
-import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 import * as Location from "expo-location";
 import MapView, { Region } from "react-native-maps";
-import { lightPurple } from "./sign-in";
-import useUserStore from "../store/user";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+
+import { lightPurple } from "@carpal/ui-parts/atoms/Text/styling";
+import useCurrentUser from "../../features/users/hooks/useCurrentUser";
 
 export default function App() {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
-  const { name, resetUserData } = useUserStore();
-
-  async function handleSignOut() {
-    try {
-      const signOutRes = await fetch("http://localhost:8080/sign-out", {
-        method: "POST",
-      });
-
-      if (signOutRes.status === 200) {
-        resetUserData();
-        router.navigate("sign-in");
-      }
-    } catch (error) {
-      throw new Error(error as string);
-    }
-  }
+  const {
+    handleSignOut,
+    user: { name },
+  } = useCurrentUser();
 
   useEffect(() => {
     (async () => {
@@ -43,7 +32,11 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeTitle}>Welcome, {name}</Text>
+      <Text style={styles.welcomeTitle}>Welcome back, {name}</Text>
+      <View style={styles.addNewContainer}>
+        <FontAwesome6 name="add" size={24} color="black" />
+        <Text>Add your typical route</Text>
+      </View>
       <MapView
         style={{
           width: "100%",
@@ -72,13 +65,19 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 36,
     fontWeight: "800",
-    color: lightPurple
+    color: lightPurple,
+  },
+  addNewContainer: {
+    display: "flex",
+    gap: 8,
+    flexDirection: "row",
+    alignItems: "center",
   },
   container: {
     flex: 1,
     flexDirection: "column",
     gap: 16,
-    paddingHorizontal: 8,
+    padding: 16,
     backgroundColor: "#fff",
     alignItems: "flex-start",
     justifyContent: "flex-start",

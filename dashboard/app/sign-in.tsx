@@ -1,15 +1,12 @@
 import { Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import {
-  Button,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Text } from "@carpal/ui-parts";
+
 import useUserStore from "../store/user";
+import { mainPurple } from "@carpal/ui-parts/atoms/Text/styling";
+import { signIn } from "../features/users/api";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -18,37 +15,35 @@ export default function SignIn() {
 
   async function handleSignIn() {
     try {
-      const res = await fetch("http://localhost:8080/sign-in", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          keepMeSignedIn: true,
-        }),
-        credentials: "include",
+      const userData = await signIn(email, password);
+
+      if (!userData) return;
+
+      updateUserData({
+        name: userData.name,
+        surname: userData.surname,
+        email: userData.email,
       });
 
-      if (res.status === 200) {
-        const { userData } = await res.json();
-        updateUserData({
-          name: userData.name,
-          surname: userData.surname,
-          email: userData.email,
-        });
-        router.navigate("/");
-      }
+      router.replace("/");
     } catch (error) {
-      console.log(error);
+      throw new Error(error as string);
     }
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Welcome to CarPal</Text>
-      <Text style={styles.subheading}>Sign in to your account</Text>
+      <Text
+        variant="subHeadingBold"
+        customStyle={{
+          opacity: 0.4,
+        }}
+      >
+        Welcome to CarPal
+      </Text>
+      <Text variant="mainHeadingBold" noColor>
+        Sign in to your account
+      </Text>
       <View style={styles.inputWrapper}>
         <TextInput
           style={styles.input}
@@ -63,27 +58,23 @@ export default function SignIn() {
           onChangeText={setPassword}
         />
         <Pressable style={styles.cta} onPress={handleSignIn}>
-          <Text style={styles.ctaText}>SIGN IN</Text>
+          <Text variant="textRegular">SIGN IN</Text>
         </Pressable>
       </View>
 
       <View style={styles.signUpCTAWrapper}>
-        <Text>Don't have an account yet?</Text>
-        <Pressable style={styles.signUpCTA} onPress={handleSignIn}>
-          <Link href="/sign-up">
-            <Text style={styles.signUpCTAText}>SIGN UP</Text>
-          </Link>
+        <Text variant="subHeading">Don't have an account yet?</Text>
+        <Pressable
+          style={styles.signUpCTA}
+          onPress={() => router.push("/sign-up")}
+        >
+          <Text variant="textRegular">SIGN UP</Text>
         </Pressable>
       </View>
       <StatusBar style="auto" />
     </View>
   );
 }
-
-export const lightYellow = "#FEFBD8";
-export const mainPeach = "#EECEB9";
-export const lightPurple = "#BB9AB1";
-export const mainPurple = "#987D9A";
 
 const styles = StyleSheet.create({
   container: {
@@ -94,19 +85,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "flex-start",
     justifyContent: "center",
-  },
-  heading: {
-    fontSize: 24,
-    fontWeight: "700",
-    opacity: 0.5,
-    color: mainPurple,
-  },
-  subheading: {
-    fontSize: 42,
-    fontWeight: "800",
-    lineHeight: 36,
-    paddingTop: 8,
-    paddingBottom: 8,
   },
   inputWrapper: {
     width: "100%",

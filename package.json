@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "engine:dev": "npm run dev -w @carpal/engine", 
+    "engine:dev": "npm run dev -w @carpal/engine",
     "dashboard:dev": "npm run ios -w @carpal/dashboard",
     "dashboard:web": "npm run web -w @carpal/dashboard",
     "app:ios": "concurrently \"npm run engine:dev\" \"npm run dashboard:dev\"",

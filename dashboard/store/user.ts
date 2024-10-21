@@ -1,9 +1,16 @@
-import { User } from "./../../engine/types/database";
+import { User } from "@carpal/drivetrain/types";
 import { create } from "zustand";
 
-type StoredUserData = Omit<User, "id" | "password" | "keep_me_signed_in">;
+export type StoredUserData = Omit<
+  User,
+  "id" | "password" | "keep_me_signed_in"
+>;
+type StoredUserDataUpdaters = {
+  updateUserData: (user: StoredUserData) => void;
+  resetUserData: () => void;
+};
 
-const useUserStore = create<StoredUserData>((set) => ({
+const useUserStore = create<StoredUserData & StoredUserDataUpdaters>((set) => ({
   name: "",
   surname: "",
   email: "",
@@ -13,11 +20,12 @@ const useUserStore = create<StoredUserData>((set) => ({
       surname: user.surname,
       email: user.email,
     })),
-  resetUserData: () => set((state) => ({
-    name: '',
-    surname: '',
-    email: ''
-  }))
+  resetUserData: () =>
+    set(() => ({
+      name: "",
+      surname: "",
+      email: "",
+    })),
 }));
 
 export default useUserStore;

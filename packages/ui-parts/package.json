@@ -1,0 +1,12 @@
+{
+  "name": "@carpal/ui-parts",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "keywords": [],
+  "author": "Kacper Łuczak",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "react-native": "^0.75.2"
+  }
+}
