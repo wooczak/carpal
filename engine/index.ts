@@ -28,14 +28,6 @@ app.use(
   })
 );
 
-function isAuthenticated(req: Express.Request, res: any, next: NextFunction) {
-  if (req.session.user) {
-    return next();
-  } else {
-    res.status(401).json({ message: "Unauthorized" });
-  }
-}
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
