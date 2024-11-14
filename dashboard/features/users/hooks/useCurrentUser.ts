@@ -18,7 +18,7 @@ export default function useCurrentUser(): HookReturnType {
 
     if (signOutRes.status === 200) {
       user.resetUserData();
-      router.replace('/root/sign-in');
+      router.replace('/sign-in');
     }
   }
 
