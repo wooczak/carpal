@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 import session from "express-session";
 import { store } from "./knex/knexstore";
 import cors from "cors";
+import { addUserJourneySchema } from "@carpal/drivetrain/validation/schema";
 
 const app = express();
 const db = knex(dbConfig);
@@ -155,6 +156,36 @@ app.post(POST.SIGN_UP, async function (req, res) {
       userData: newUser,
     });
   } catch (error: unknown) {
+    res.status(500).json({
+      error: (error as ZodError).issues
+        ? (error as ZodError).issues.map((err) => err.message)
+        : (error as Error).message,
+    });
+  }
+});
+
+app.post(POST.ADD_JOURNEY, async (req, res) => {
+  try {
+    const body = req.body;
+
+    const userJourneyInput = addUserJourneySchema.parse(body);
+
+    await db<types.Journey>("journey")
+      .insert([
+        {
+          user_id: userJourneyInput.userId,
+          from_destination: userJourneyInput.fromDestination,
+          to_destination: userJourneyInput.toDestination,
+          dates: userJourneyInput.dates,
+        },
+      ])
+      .returning("*");
+
+    res.status(200).json({
+      message: `New journey added for user ${userJourneyInput.userId}`,
+      journeyData: userJourneyInput,
+    });
+  } catch (error) {
     res.status(500).json({
       error: (error as ZodError).issues
         ? (error as ZodError).issues.map((err) => err.message)

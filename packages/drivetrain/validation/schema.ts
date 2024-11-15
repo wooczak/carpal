@@ -29,6 +29,13 @@ const keepMeSignedInSchema = z.boolean({
   message: "The keepMeSignedIn boolean has not been sent",
 });
 
+export const validNumbersSchema = z
+  .array(z.number().int().min(1).max(7)) // Validate as an array of numbers
+  .nonempty() // Ensure array is not empty
+  .refine((arr) => new Set(arr).size === arr.length, {
+    message: "Array contains duplicate values",
+  });
+
 export const userSignUpInputSchema = z.object({
   name: nameSchema,
   surname: surnameSchema,
@@ -41,4 +48,11 @@ export const userSignInInputSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   keepMeSignedIn: keepMeSignedInSchema,
+});
+
+export const addUserJourneySchema = z.object({
+  userId: z.string(),
+  fromDestination: z.string(),
+  toDestination: z.string(),
+  dates: validNumbersSchema,
 });
