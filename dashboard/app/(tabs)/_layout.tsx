@@ -1,4 +1,4 @@
-import { Redirect, Stack, Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import useUserStore from "../../store/user";
 
